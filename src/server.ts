@@ -61,7 +61,6 @@ app.put("/signatures/:epoch", (req, res) => {
   const epochId = parseInt(req.params.epoch);
   const { _epochId, ...rest } = req.body;
   const updatedSignature = updateSignatureByEpoch(epochId, rest);
-  console.log(updatedSignature);
   if (updatedSignature !== null) {
     res.status(200).json({
       status: "success",

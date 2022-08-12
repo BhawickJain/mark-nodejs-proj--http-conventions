@@ -5,7 +5,10 @@ import {
   getAllSignatures,
   insertSignature,
   removeSignatureByEpoch,
+  updateSignature,
+  updateSignatureByEpoch,
 } from "./signature/model";
+import { update } from "lodash";
 
 const app = express();
 
@@ -20,11 +23,11 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/signatures", (req, res) => {
-  const signatures = getAllSignatures()
+  const signatures = getAllSignatures();
   res.status(200).json({
     status: "success",
     data: {
-      signatures
+      signatures,
     },
   });
 });
@@ -54,6 +57,27 @@ app.post("/signatures", (req, res) => {
   }
 });
 
+app.put("/signatures/:epoch", (req, res) => {
+  const epochId = parseInt(req.params.epoch);
+  const { _epochId, ...rest } = req.body;
+  const updatedSignature = updateSignatureByEpoch(epochId, rest);
+  console.log(updatedSignature);
+  if (updatedSignature !== null) {
+    res.status(200).json({
+      status: "success",
+      data: {
+        signature: updatedSignature,
+      },
+    });
+  } else {
+    res.status(404).json({
+      status: "fail",
+      data: {
+        epochId: `could not find ${epochId}`,
+      },
+    });
+  }
+});
 app.get("/signatures/:epoch", (req, res) => {
   // :epoch is a route parameter
   //  see documentation: https://expressjs.com/en/guide/routing.html

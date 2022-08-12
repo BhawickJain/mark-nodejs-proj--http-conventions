@@ -5,6 +5,7 @@ import {
   findSignatureByEpoch,
   getAllSignatures,
   insertSignature,
+  removeSignatureByEpoch,
   Signature,
   updateSignatureByEpoch,
 } from "./signature/model";
@@ -12,6 +13,27 @@ import { resetMockFor } from "./test-utils";
 
 // mock all the model functions
 jest.mock("./signature/model");
+
+describe("DELETE /signatures/:epoch", () => {
+  const mockEpochId = 1614096121305;
+  const mockResponse = {
+    status: "success",
+  };
+  beforeEach(() => {
+    resetMockFor(removeSignatureByEpoch, () => mockResponse);
+  });
+
+  it("calls removeSignatureByEpoch", async () => {
+    await supertest(app).delete(`/signatures/${mockEpochId}`);
+    expect(removeSignatureByEpoch).toHaveBeenCalledTimes(1);
+  });
+
+  it("responds with a status of 200, a status of success and signatures array in data", async () => {
+    const response = await supertest(app).delete(`/signatures/${mockEpochId}`);
+    expect(response.status).toBe(200);
+    expect(response.body.status).toBe("success");
+  });
+});
 
 describe("GET /signatures", () => {
   const mockSignaturesResponse: Signature[] = [
@@ -80,7 +102,7 @@ describe("GET /signatures/:epoch", () => {
   });
 });
 
-describe.skip("PUT /signatures/:epoch", () => {
+describe("PUT /signatures/:epoch", () => {
   const passingEpochId = 1614096121305;
   const passingSignature = {
     epochId: passingEpochId,
@@ -112,7 +134,10 @@ describe.skip("PUT /signatures/:epoch", () => {
     await supertest(app)
       .put("/signatures/1614095562950")
       .send(updateProperties);
-    expect(updateSignatureByEpoch).toHaveBeenCalledWith(1614095562950, updateProperties);
+    expect(updateSignatureByEpoch).toHaveBeenCalledWith(
+      1614095562950,
+      updateProperties
+    );
   });
 
   test("when updateSignatureByEpoch returns a signature, it returns a 200 with the given epoch and full updated signature", async () => {
@@ -142,7 +167,7 @@ describe.skip("PUT /signatures/:epoch", () => {
 });
 
 describe("POST /signatures", () => {
-  const mockResponseEpochId = 123456789
+  const mockResponseEpochId = 123456789;
 
   beforeEach(() => {
     resetMockFor(
@@ -175,9 +200,9 @@ describe("POST /signatures", () => {
     expect(response.body.status).toBe("success");
     expect(response.body.data).toHaveProperty("signature");
     expect(response.body.data.signature).toStrictEqual({
-      name: 'Noddy',
-      epochId: mockResponseEpochId
-    })
+      name: "Noddy",
+      epochId: mockResponseEpochId,
+    });
   });
 
   test("when not provided with a name in the request body, it responds with a status of 400, a status of success and signature in data", async () => {
